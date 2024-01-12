@@ -24,7 +24,20 @@ const initialState = [
 function App() {
   const [state, setState] = useState(initialState);
 
-  const handleClick = (e) => {};
+  const handleChartClick = (e) => {
+    console.log("handleLineChartClick", e);
+  };
+
+  const onMouseDownOverLine = (e) => {
+    console.log("onMouseDownOverLine", e);
+  };
+
+  const handleDotClick = (e) => {
+    // e.payload.x, y
+    const { x, y } = e.payload;
+    setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
+    console.log("handleDotClick", e);
+  };
 
   return (
     <div className="App">
@@ -42,19 +55,20 @@ function App() {
           <LineChart
             className="custom-y-axis"
             data={state}
-            onClick={(e) => {
-              console.log("onClick", e);
-            }}
+            onClick={handleChartClick}
           >
             <Line
               type="monotone"
               dataKey="y"
               stroke="#8884d8"
               strokeWidth={5}
-              activeDot={{ stroke: "red", strokeWidth: 2, r: 10 }}
-              onMouseDown={(e) => {
-                console.log("onMouseDown", e);
+              dot={{
+                stroke: "red",
+                strokeWidth: 2,
+                r: 5,
+                onClick: handleDotClick,
               }}
+              onMouseDown={onMouseDownOverLine}
             />
             <CartesianGrid stroke="#ccc" />
             <XAxis dataKey="x" />
@@ -67,3 +81,5 @@ function App() {
 }
 
 export default App;
+
+// activeDot={{ stroke: "red", strokeWidth: 2, r: 10 }}
