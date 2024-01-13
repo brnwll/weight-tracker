@@ -9,6 +9,11 @@ import {
 } from "recharts";
 import "./App.css";
 
+// TODO: BUG FIX
+// Solved with mouse, but if I drag off of chart on touchscreen while
+// channging a weight entry bad thing happen. Need to figure out how to
+// fix this
+
 const initialState = [
   { x: "", y: null },
   { x: "1/1/24", y: 235 },
