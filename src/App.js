@@ -29,84 +29,10 @@ function App() {
   const [movingDot, setMovingDot] = useState(null); // x
   // { x: 1/2/24, y: 232, previousY: 232 }
 
-  const handleChartClick = (e) => {
-    // console.log("handleLineChartClick", e);
-    // if (movingDot) {
-    //   const { x, y } = movingDot;
-    //   const newY = convertChartYToDotY(e.chartY);
-    //   // What is the maximum and minimum chartY values?
-    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-    //   setMovingDot(null);
-    // }
-  };
-
-  const handleDotClick = (e) => {
-    // // e.payload.x, y
-    // //const { x, y } = e.payload;
-    // //setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
-    // if (!movingDot) {
-    //   setMovingDot({ x: e.payload.x, y: e.payload.y });
-    // } else {
-    //   setMovingDot(null);
-    // }
-  };
-
-  const onTouchMove = (e) => {
-    // if (movingDot) {
-    //   const { x, y } = movingDot;
-    //   const newY = convertChartYToDotY(e.chartY);
-    //   // What is the maximum and minimum chartY values?
-    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-    // }
-  };
-
-  const handleMouseMove = (e) => {
-    // if (movingDot) {
-    //   const { x, y } = movingDot;
-    //   const newY = convertChartYToDotY(e.chartY);
-    //   // What is the maximum and minimum chartY values?
-    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-    // }
-    //console.log("handleMouseMove", e);
-  };
-
-  const handleChartMouseEnter = (e) => {
-    // TODO: Move this to run once when app loads, and again when window is resized
-    // This is used to set a new weight for a dot using the mouse
-    const chartHeight = document
-      .getElementById("yo-chart")
-      .getBoundingClientRect().height;
-    setChartHeight(chartHeight);
-  };
-
-  /*
-  const handleTouchStart = (e) => {
-    //alert("touch start");
-    setMovingDot({ x: e.payload.x, y: e.payload.y });
-  };
-
-  const handleTouchMove = (e) => {
-    //alert("touch move");
-    // todo
-    if (movingDot) {
-      const { x, y } = movingDot;
-      const newY = convertChartYToDotY(e.chartY);
-      // What is the maximum and minimum chartY values?
-      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    alert("touch end");
-    setMovingDot(null);
-  };
-  */
-
   const startMoveDot = (e) => {
     const weightEntry = state.find((weight) => weight.x === e.payload.x);
     weightEntry.previousY = weightEntry.y;
     setMovingDot(weightEntry);
-    console.log("startMoveDot", e);
   };
 
   const moveDot = (e) => {
@@ -116,10 +42,7 @@ function App() {
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
   };
 
-  const endMoveDot = (e) => {
-    setMovingDot(null);
-    console.log("endMoveDot", e);
-  };
+  const endMoveDot = (e) => setMovingDot(null);
 
   const handleMouseLeaveDuringWeightChange = (e) => {
     if (!movingDot) return;
