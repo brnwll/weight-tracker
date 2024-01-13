@@ -132,7 +132,12 @@ function App() {
                 onTouchStart: startMoveDot,
               }}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              isActiveAnimation={false}
+              // TODO: Pin to dot, how?
+              position={{ x: 0, y: 0 }}
+            />
             <CartesianGrid stroke="#ccc" opacity={0.75} strokeDasharray="2 3" />
             <XAxis dataKey="x" />
             <YAxis className="hide" domain={[yMin, yMax]} />
