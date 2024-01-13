@@ -19,6 +19,8 @@ const initialState = [
   { x: "1/6/24", y: 226 },
   { x: "1/7/24", y: 228 },
   { x: "1/8/24", y: 225 },
+  { x: "", y: null },
+  { x: "", y: null },
 ];
 
 function App() {
@@ -37,6 +39,7 @@ function App() {
 
   const moveDot = (e) => {
     if (!movingDot) return;
+
     const x = movingDot.x;
     const y = convertToWeight(e.chartY);
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
@@ -80,18 +83,23 @@ function App() {
             onMouseMove={moveDot}
             onMouseUp={endMoveDot}
             onMouseLeave={handleMouseLeaveDuringWeightChange}
+            onTouchMove={moveDot}
+            onTouchEnd={endMoveDot}
           >
             <Line
               type="monotone"
               dataKey="y"
               stroke="#8884d8"
               strokeWidth={5}
+              isAnimationActive={false}
               dot={{
                 stroke: "#8884d8",
                 strokeWidth: 1,
-                fill: "#8884d8",
-                r: 5,
+                //fill: "#8884d8",
+                r: 10,
+                //pointHitRadius: 50, // for improved touch support
                 onMouseDown: startMoveDot,
+                onTouchStart: startMoveDot,
               }}
             />
             <CartesianGrid stroke="#ccc" />
