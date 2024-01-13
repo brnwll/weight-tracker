@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -26,49 +26,47 @@ function App() {
   const [yMin, setYMin] = useState(170);
   const [yMax, setYMax] = useState(240);
   const [state, setState] = useState(initialState);
-  const [movingDot, setMovingDot] = useState(null); // [x, y]
+  const [movingDot, setMovingDot] = useState(null); // x
+  // { x: 1/2/24, y: 232, previousY: 232 }
 
   const handleChartClick = (e) => {
-    console.log("handleLineChartClick", e);
-    if (movingDot) {
-      const { x, y } = movingDot;
-      const newY = convertChartYToDotY(e.chartY);
-      // What is the maximum and minimum chartY values?
-      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-      setMovingDot(null);
-    }
+    // console.log("handleLineChartClick", e);
+    // if (movingDot) {
+    //   const { x, y } = movingDot;
+    //   const newY = convertChartYToDotY(e.chartY);
+    //   // What is the maximum and minimum chartY values?
+    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+    //   setMovingDot(null);
+    // }
   };
 
   const handleDotClick = (e) => {
-    // e.payload.x, y
-    //const { x, y } = e.payload;
-    //setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
-    if (!movingDot) {
-      setMovingDot({ x: e.payload.x, y: e.payload.y });
-    } else {
-      setMovingDot(null);
-    }
+    // // e.payload.x, y
+    // //const { x, y } = e.payload;
+    // //setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
+    // if (!movingDot) {
+    //   setMovingDot({ x: e.payload.x, y: e.payload.y });
+    // } else {
+    //   setMovingDot(null);
+    // }
   };
 
-  const convertChartYToDotY = (chartY) => {
-    //console.log("chartHeight", chartHeight);
-    //console.log("chartY", chartY);
-    //console.log("yMin", yMin);
-    //console.log("yMax", yMax);
-    const dotY = Math.round(
-      ((chartHeight - chartY) / chartHeight) * (yMax - yMin) + yMin
-    );
-    console.log("dotY", dotY);
-    return dotY;
+  const onTouchMove = (e) => {
+    // if (movingDot) {
+    //   const { x, y } = movingDot;
+    //   const newY = convertChartYToDotY(e.chartY);
+    //   // What is the maximum and minimum chartY values?
+    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+    // }
   };
 
   const handleMouseMove = (e) => {
-    if (movingDot) {
-      const { x, y } = movingDot;
-      const newY = convertChartYToDotY(e.chartY);
-      // What is the maximum and minimum chartY values?
-      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
-    }
+    // if (movingDot) {
+    //   const { x, y } = movingDot;
+    //   const newY = convertChartYToDotY(e.chartY);
+    //   // What is the maximum and minimum chartY values?
+    //   setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+    // }
     //console.log("handleMouseMove", e);
   };
 
@@ -80,6 +78,65 @@ function App() {
       .getBoundingClientRect().height;
     setChartHeight(chartHeight);
   };
+
+  /*
+  const handleTouchStart = (e) => {
+    //alert("touch start");
+    setMovingDot({ x: e.payload.x, y: e.payload.y });
+  };
+
+  const handleTouchMove = (e) => {
+    //alert("touch move");
+    // todo
+    if (movingDot) {
+      const { x, y } = movingDot;
+      const newY = convertChartYToDotY(e.chartY);
+      // What is the maximum and minimum chartY values?
+      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    alert("touch end");
+    setMovingDot(null);
+  };
+  */
+
+  const startMoveDot = (e) => {
+    const weightEntry = state.find((weight) => weight.x === e.payload.x);
+    weightEntry.previousY = weightEntry.y;
+    setMovingDot(weightEntry);
+    console.log("startMoveDot", e);
+  };
+
+  const moveDot = (e) => {
+    if (!movingDot) return;
+    const x = movingDot.x;
+    const y = convertToWeight(e.chartY);
+    setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
+  };
+
+  const endMoveDot = (e) => {
+    setMovingDot(null);
+    console.log("endMoveDot", e);
+  };
+
+  const handleMouseLeaveDuringWeightChange = (e) => {
+    if (!movingDot) return;
+    const x = movingDot.x;
+    const y = movingDot.previousY;
+    setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
+    setMovingDot(null);
+  };
+
+  const convertToWeight = (y) => {
+    return Math.round(((chartHeight - y) / chartHeight) * (yMax - yMin) + yMin);
+  };
+
+  useEffect(() => {
+    const canvas = document.getElementById("yo-chart").getBoundingClientRect();
+    setChartHeight(canvas.height);
+  }, []);
 
   return (
     <div className="App">
@@ -93,13 +150,13 @@ function App() {
         </ResponsiveContainer>
       </div>
       <div id="yo-chart">
-        <ResponsiveContainer width={1000} height="100%">
+        <ResponsiveContainer width={700} height="100%">
           <LineChart
             className="custom-y-axis"
             data={state}
-            onClick={handleChartClick}
-            onMouseEnter={handleChartMouseEnter}
-            onMouseMove={handleMouseMove}
+            onMouseMove={moveDot}
+            onMouseUp={endMoveDot}
+            onMouseLeave={handleMouseLeaveDuringWeightChange}
           >
             <Line
               type="monotone"
@@ -111,7 +168,7 @@ function App() {
                 strokeWidth: 1,
                 fill: "#8884d8",
                 r: 5,
-                onClick: handleDotClick,
+                onMouseDown: startMoveDot,
               }}
             />
             <CartesianGrid stroke="#ccc" />
@@ -125,5 +182,3 @@ function App() {
 }
 
 export default App;
-
-// activeDot={{ stroke: "red", strokeWidth: 2, r: 10 }}
