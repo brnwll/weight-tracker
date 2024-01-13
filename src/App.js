@@ -22,21 +22,63 @@ const initialState = [
 ];
 
 function App() {
+  const [chartHeight, setChartHeight] = useState(0);
+  const [yMin, setYMin] = useState(170);
+  const [yMax, setYMax] = useState(240);
   const [state, setState] = useState(initialState);
+  const [movingDot, setMovingDot] = useState(null); // [x, y]
 
   const handleChartClick = (e) => {
     console.log("handleLineChartClick", e);
-  };
-
-  const onMouseDownOverLine = (e) => {
-    console.log("onMouseDownOverLine", e);
+    if (movingDot) {
+      const { x, y } = movingDot;
+      const newY = convertChartYToDotY(e.chartY);
+      // What is the maximum and minimum chartY values?
+      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+      setMovingDot(null);
+    }
   };
 
   const handleDotClick = (e) => {
     // e.payload.x, y
-    const { x, y } = e.payload;
-    setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
-    console.log("handleDotClick", e);
+    //const { x, y } = e.payload;
+    //setState(state.map((item) => (item.x === x ? { x, y: 190 } : item)));
+    if (!movingDot) {
+      setMovingDot({ x: e.payload.x, y: e.payload.y });
+    } else {
+      setMovingDot(null);
+    }
+  };
+
+  const convertChartYToDotY = (chartY) => {
+    //console.log("chartHeight", chartHeight);
+    //console.log("chartY", chartY);
+    //console.log("yMin", yMin);
+    //console.log("yMax", yMax);
+    const dotY = Math.round(
+      ((chartHeight - chartY) / chartHeight) * (yMax - yMin) + yMin
+    );
+    console.log("dotY", dotY);
+    return dotY;
+  };
+
+  const handleMouseMove = (e) => {
+    if (movingDot) {
+      const { x, y } = movingDot;
+      const newY = convertChartYToDotY(e.chartY);
+      // What is the maximum and minimum chartY values?
+      setState(state.map((item) => (item.x === x ? { x, y: newY } : item)));
+    }
+    //console.log("handleMouseMove", e);
+  };
+
+  const handleChartMouseEnter = (e) => {
+    // TODO: Move this to run once when app loads, and again when window is resized
+    // This is used to set a new weight for a dot using the mouse
+    const chartHeight = document
+      .getElementById("yo-chart")
+      .getBoundingClientRect().height;
+    setChartHeight(chartHeight);
   };
 
   return (
@@ -46,7 +88,7 @@ function App() {
           <LineChart className="custom-y-axis" data={state}>
             <Line className="hide" dataKey="y" />
             <XAxis className="hide" dataKey="x" />
-            <YAxis domain={[170, 240]} />
+            <YAxis domain={[yMin, yMax]} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -56,6 +98,8 @@ function App() {
             className="custom-y-axis"
             data={state}
             onClick={handleChartClick}
+            onMouseEnter={handleChartMouseEnter}
+            onMouseMove={handleMouseMove}
           >
             <Line
               type="monotone"
@@ -63,16 +107,16 @@ function App() {
               stroke="#8884d8"
               strokeWidth={5}
               dot={{
-                stroke: "red",
-                strokeWidth: 2,
+                stroke: "#8884d8",
+                strokeWidth: 1,
+                fill: "#8884d8",
                 r: 5,
                 onClick: handleDotClick,
               }}
-              onMouseDown={onMouseDownOverLine}
             />
             <CartesianGrid stroke="#ccc" />
             <XAxis dataKey="x" />
-            <YAxis className="hide" domain={[170, 240]} />
+            <YAxis className="hide" domain={[yMin, yMax]} />
           </LineChart>
         </ResponsiveContainer>
       </div>
