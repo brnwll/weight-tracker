@@ -3,9 +3,10 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  CartesianGrid,
   XAxis,
   YAxis,
+  Tooltip,
+  CartesianGrid,
 } from "recharts";
 import "./App.css";
 
@@ -69,6 +70,24 @@ function App() {
     console.log(e);
   };
 
+  const CustomTooltip = ({ active, payload }) => {
+    if (!(active && payload && payload.length)) return null;
+    const { x, y } = payload[0].payload;
+    if (changingWeightValue) {
+      return (
+        <div className="custom-tooltip">
+          <p className="desc">Now we're editing</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="custom-tooltip">
+          <p className="desc">{`${x} ${y}`}</p>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="App">
       <div id="y-axis">
@@ -113,6 +132,7 @@ function App() {
                 onTouchStart: startMoveDot,
               }}
             />
+            <Tooltip content={<CustomTooltip />} />
             <CartesianGrid stroke="#ccc" opacity={0.75} strokeDasharray="2 3" />
             <XAxis dataKey="x" />
             <YAxis className="hide" domain={[yMin, yMax]} />
