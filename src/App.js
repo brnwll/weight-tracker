@@ -41,17 +41,13 @@ function App() {
     weightEntry.previousY = weightEntry.y;
     setChangingWeightValue(weightEntry);
   };
-
   const moveDot = (e) => {
     if (!changingWeightValue) return;
-
     const x = changingWeightValue.x;
     const y = convertToWeight(e.chartY);
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
   };
-
   const endMoveDot = (e) => setChangingWeightValue(false);
-
   const handleMouseLeaveDuringWeightChange = (e) => {
     if (!changingWeightValue) return;
     const x = changingWeightValue.x;
@@ -69,6 +65,10 @@ function App() {
     setChartHeight(canvas.height);
   }, []);
 
+  const handleMouseDownOnChart = (e) => {
+    console.log(e);
+  };
+
   return (
     <div className="App">
       <div id="y-axis">
@@ -85,6 +85,14 @@ function App() {
           <LineChart
             className="custom-y-axis"
             data={state}
+            // TODO: ADD A NEW ENTRIES
+            // use onMouseDown to start a new entry
+            onMouseDown={handleMouseDownOnChart}
+            // use onTouchStart to start a new entry
+            // this will give you an activeLabel (x-axis value)
+            // if there is no entry for this label AND...
+            // the label (date) is not in the future
+            // then add a new entry to the state
             onMouseMove={moveDot}
             onMouseUp={endMoveDot}
             onMouseLeave={handleMouseLeaveDuringWeightChange}
