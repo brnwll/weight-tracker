@@ -28,31 +28,31 @@ function App() {
   const [yMin, setYMin] = useState(170);
   const [yMax, setYMax] = useState(240);
   const [state, setState] = useState(initialState);
-  const [movingDot, setMovingDot] = useState(null); // x
+  const [changingWeightValue, setChangingWeightValue] = useState(false);
   // { x: 1/2/24, y: 232, previousY: 232 }
 
   const startMoveDot = (e) => {
     const weightEntry = state.find((weight) => weight.x === e.payload.x);
     weightEntry.previousY = weightEntry.y;
-    setMovingDot(weightEntry);
+    setChangingWeightValue(weightEntry);
   };
 
   const moveDot = (e) => {
-    if (!movingDot) return;
+    if (!changingWeightValue) return;
 
-    const x = movingDot.x;
+    const x = changingWeightValue.x;
     const y = convertToWeight(e.chartY);
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
   };
 
-  const endMoveDot = (e) => setMovingDot(null);
+  const endMoveDot = (e) => setChangingWeightValue(false);
 
   const handleMouseLeaveDuringWeightChange = (e) => {
-    if (!movingDot) return;
-    const x = movingDot.x;
-    const y = movingDot.previousY;
+    if (!changingWeightValue) return;
+    const x = changingWeightValue.x;
+    const y = changingWeightValue.previousY;
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
-    setMovingDot(null);
+    setChangingWeightValue(false);
   };
 
   const convertToWeight = (y) => {
@@ -94,15 +94,13 @@ function App() {
               isAnimationActive={false}
               dot={{
                 stroke: "#8884d8",
-                strokeWidth: 1,
-                //fill: "#8884d8",
+                strokeWidth: 3,
                 r: 10,
-                //pointHitRadius: 50, // for improved touch support
                 onMouseDown: startMoveDot,
                 onTouchStart: startMoveDot,
               }}
             />
-            <CartesianGrid stroke="#ccc" />
+            <CartesianGrid stroke="#ccc" opacity={0.75} strokeDasharray="2 3" />
             <XAxis dataKey="x" />
             <YAxis className="hide" domain={[yMin, yMax]} />
           </LineChart>
