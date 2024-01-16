@@ -10,11 +10,6 @@ import {
 } from "recharts";
 import "./App.css";
 
-// TODO: BUG FIX
-// Solved with mouse, but if I drag off of chart on touchscreen while
-// channging a weight entry bad thing happen. Need to figure out how to
-// fix this
-
 const initialState = [
   { x: "", y: null },
   { x: "1/1/24", y: 235 },
@@ -34,27 +29,30 @@ function App() {
   const [yMin, setYMin] = useState(170);
   const [yMax, setYMax] = useState(240);
   const [state, setState] = useState(initialState);
-  const [changingWeightValue, setChangingWeightValue] = useState(false);
-  // { x: 1/2/24, y: 232, previousY: 232 }
+  const [editingWeightEntry, setEditingWeightEntry] = useState(false);
+  // { x: 1/2/24, y: 232 } or false
 
-  const startMoveDot = (e) => {
+  const startEditingWeightEntry = (e) => {
     const weightEntry = state.find((weight) => weight.x === e.payload.x);
-    weightEntry.previousY = weightEntry.y;
-    setChangingWeightValue(weightEntry);
+    setEditingWeightEntry(weightEntry);
   };
-  const moveDot = (e) => {
-    if (!changingWeightValue) return;
-    const x = changingWeightValue.x;
-    const y = convertToWeight(e.chartY);
-    setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
+
+  const stopEditingWeightEntry = (e) => setEditingWeightEntry(false);
+
+  const handleChartOnMove = (e) => {
+    // e.isTooltipActive is false when user touchmove exits the chart
+    const { isTooltipActive } = e;
+    if (editingWeightEntry && isTooltipActive) {
+      const x = editingWeightEntry.x;
+      const y = convertToWeight(e.chartY);
+      setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
+    } else if (editingWeightEntry) {
+      stopEditingWeightEntry();
+    }
   };
-  const endMoveDot = (e) => setChangingWeightValue(false);
-  const handleMouseLeaveDuringWeightChange = (e) => {
-    if (!changingWeightValue) return;
-    const x = changingWeightValue.x;
-    const y = changingWeightValue.previousY;
-    setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
-    setChangingWeightValue(false);
+
+  const handleChartOnMouseLeave = (e) => {
+    if (editingWeightEntry) stopEditingWeightEntry();
   };
 
   const convertToWeight = (y) => {
@@ -66,14 +64,10 @@ function App() {
     setChartHeight(canvas.height);
   }, []);
 
-  const handleMouseDownOnChart = (e) => {
-    console.log(e);
-  };
-
   const CustomTooltip = ({ active, payload }) => {
     if (!(active && payload && payload.length)) return null;
     const { x, y } = payload[0].payload;
-    if (changingWeightValue) {
+    if (editingWeightEntry) {
       return (
         <div className="custom-tooltip">
           <p className="desc">Now we're editing</p>
@@ -106,17 +100,16 @@ function App() {
             data={state}
             // TODO: ADD A NEW ENTRIES
             // use onMouseDown to start a new entry
-            onMouseDown={handleMouseDownOnChart}
             // use onTouchStart to start a new entry
             // this will give you an activeLabel (x-axis value)
             // if there is no entry for this label AND...
             // the label (date) is not in the future
             // then add a new entry to the state
-            onMouseMove={moveDot}
-            onMouseUp={endMoveDot}
-            onMouseLeave={handleMouseLeaveDuringWeightChange}
-            onTouchMove={moveDot}
-            onTouchEnd={endMoveDot}
+            onMouseMove={handleChartOnMove}
+            onMouseUp={stopEditingWeightEntry}
+            onMouseLeave={handleChartOnMouseLeave}
+            onTouchMove={handleChartOnMove}
+            onTouchEnd={stopEditingWeightEntry}
           >
             <Line
               type="monotone"
@@ -128,15 +121,17 @@ function App() {
                 stroke: "#8884d8",
                 strokeWidth: 3,
                 r: 10,
-                onMouseDown: startMoveDot,
-                onTouchStart: startMoveDot,
+                onMouseDown: startEditingWeightEntry,
+                onTouchStart: startEditingWeightEntry,
               }}
             />
             <Tooltip
               content={<CustomTooltip />}
               isActiveAnimation={false}
+              animationDuration={0}
               // TODO: Pin to dot, how?
-              position={{ x: 0, y: 0 }}
+              //coordinate={{ x: 100, y: 0 }}
+              //position={{ x: coordinates.x, y: coordinates.y }}
             />
             <CartesianGrid stroke="#ccc" opacity={0.75} strokeDasharray="2 3" />
             <XAxis dataKey="x" />
