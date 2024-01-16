@@ -20,9 +20,25 @@ const initialState = [
   { x: "1/6/24", y: 226 },
   { x: "1/7/24", y: 228 },
   { x: "1/8/24", y: 225 },
-  { x: "", y: null },
-  { x: "", y: null },
+  { x: "1/9/24", y: null },
+  { x: "1/10/24", y: null },
+  { x: "1/11/24", y: null },
+  { x: "1/12/24", y: null },
+  { x: "1/13/24", y: null },
+  { x: "1/14/24", y: null },
+  { x: "1/15/24", y: null },
+  { x: "1/16/24", y: null },
+  { x: "1/17/24", y: null },
+  { x: "1/18/24", y: null },
+  { x: "1/19/24", y: null },
 ];
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    default:
+      return state;
+  }
+};
 
 function App() {
   const [chartHeight, setChartHeight] = useState(0);
@@ -40,6 +56,15 @@ function App() {
     setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
   };
   const stopEditingWeightEntry = (e) => setEditingWeightEntry(false);
+
+  const handleChartOnMouseDown = (e) => {
+    const date = new Date(e.activeLabel);
+    console.log(date > new Date());
+  };
+
+  const handleChartOnTouchStart = (e) => {
+    console.log("touch start");
+  };
 
   const handleChartOnMove = (e) => {
     if (editingWeightEntry) {
@@ -63,22 +88,30 @@ function App() {
     setChartHeight(canvas.height);
   }, []);
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (!(active && payload && payload.length)) return null;
+  const CustomTooltip = ({ payload }) => {
+    if (!(payload && payload.length)) return;
     const { x, y } = payload[0].payload;
+
+    if (!y && !editingWeightEntry) {
+      return (
+        <div className="custom-tooltip">
+          <p className="desc">{x}</p>
+        </div>
+      );
+    }
+
     if (editingWeightEntry) {
       return (
         <div className="custom-tooltip">
           <p className="desc">Now we're editing</p>
         </div>
       );
-    } else {
-      return (
-        <div className="custom-tooltip">
-          <p className="desc">{`${x} ${y}`}</p>
-        </div>
-      );
     }
+    return (
+      <div className="custom-tooltip">
+        <p className="desc">{`${x} ${y}`}</p>
+      </div>
+    );
   };
 
   return (
@@ -104,6 +137,8 @@ function App() {
             // if there is no entry for this label AND...
             // the label (date) is not in the future
             // then add a new entry to the state
+            onMouseDown={handleChartOnMouseDown}
+            onTouchStart={handleChartOnTouchStart}
             onMouseMove={handleChartOnMove}
             onMouseUp={stopEditingWeightEntry}
             onMouseLeave={handleChartOnMouseLeave}
@@ -128,9 +163,10 @@ function App() {
               content={<CustomTooltip />}
               isActiveAnimation={false}
               animationDuration={0}
+              filterNull={false}
               // TODO: Pin to dot, how?
               //coordinate={{ x: 100, y: 0 }}
-              //position={{ x: coordinates.x, y: coordinates.y }}
+              //position={{ x: 0, y: 0 }}
             />
             <CartesianGrid stroke="#ccc" opacity={0.75} strokeDasharray="2 3" />
             <XAxis dataKey="x" />
