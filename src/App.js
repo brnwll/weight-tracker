@@ -32,27 +32,26 @@ function App() {
   const [editingWeightEntry, setEditingWeightEntry] = useState(false);
   // { x: 1/2/24, y: 232 } or false
 
-  const startEditingWeightEntry = (e) => {
-    const weightEntry = state.find((weight) => weight.x === e.payload.x);
-    setEditingWeightEntry(weightEntry);
+  const startEditingWeightEntry = (e) =>
+    setEditingWeightEntry(state.find((weight) => weight.x === e.payload.x));
+  const editWeightEntry = (e) => {
+    const x = editingWeightEntry.x;
+    const y = convertToWeight(e.chartY);
+    setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
   };
-
   const stopEditingWeightEntry = (e) => setEditingWeightEntry(false);
 
   const handleChartOnMove = (e) => {
-    // e.isTooltipActive is false when user touchmove exits the chart
-    const { isTooltipActive } = e;
-    if (editingWeightEntry && isTooltipActive) {
-      const x = editingWeightEntry.x;
-      const y = convertToWeight(e.chartY);
-      setState(state.map((entry) => (entry.x === x ? { x, y } : entry)));
-    } else if (editingWeightEntry) {
-      stopEditingWeightEntry();
+    if (editingWeightEntry) {
+      // isTooltipActive is false when user touchmove exits the chart
+      e.isTooltipActive ? editWeightEntry(e) : stopEditingWeightEntry();
     }
   };
 
   const handleChartOnMouseLeave = (e) => {
-    if (editingWeightEntry) stopEditingWeightEntry();
+    if (editingWeightEntry) {
+      stopEditingWeightEntry();
+    }
   };
 
   const convertToWeight = (y) => {
