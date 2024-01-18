@@ -57,14 +57,26 @@ function App() {
   };
   const stopEditingWeightEntry = (e) => setEditingWeightEntry(false);
 
-  const handleChartOnMouseDown = (e) => {
-    const date = new Date(e.activeLabel);
-    console.log(date > new Date());
+  const chart_onMouseDown = ({ activeLabel, chartY }) => {
+    const insideChartGrid = !!chartY;
+    if (!insideChartGrid) return;
+    const selectedDate = new Date(activeLabel);
+    const isFutureDate = selectedDate > new Date();
+    const isExistingEntry = !!state.find(({ x }) => x === activeLabel).y;
+    if (!isFutureDate && !isExistingEntry) {
+      // addNewEntry(e.activeLabel, e.chartY)
+      const newEntry = {
+        x: String(activeLabel),
+        y: convertToWeight(chartY),
+      };
+      console.log(activeLabel, convertToWeight(chartY));
+      setState(
+        state.map((entry) => (entry.x === newEntry.x ? newEntry : entry))
+      );
+    }
   };
 
-  const handleChartOnTouchStart = (e) => {
-    console.log("touch start");
-  };
+  const chart_onTouchStart = (e) => chart_onMouseDown(e);
 
   const handleChartOnMove = (e) => {
     if (editingWeightEntry) {
@@ -137,8 +149,8 @@ function App() {
             // if there is no entry for this label AND...
             // the label (date) is not in the future
             // then add a new entry to the state
-            onMouseDown={handleChartOnMouseDown}
-            onTouchStart={handleChartOnTouchStart}
+            onMouseDown={chart_onMouseDown}
+            onTouchStart={chart_onTouchStart}
             onMouseMove={handleChartOnMove}
             onMouseUp={stopEditingWeightEntry}
             onMouseLeave={handleChartOnMouseLeave}
@@ -151,6 +163,7 @@ function App() {
               stroke="#8884d8"
               strokeWidth={5}
               isAnimationActive={false}
+              connectNulls={true}
               dot={{
                 stroke: "#8884d8",
                 strokeWidth: 3,
